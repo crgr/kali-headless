@@ -13,25 +13,21 @@ variable "iso_url" {
   default = "https://cdimage.kali.org/kali-2025.3/kali-linux-2025.3-installer-netinst-amd64.iso"
 }
 
-# Reduced resources for headless
 variable "vm_cpu_cores" {
   type    = string
-  default = "2"
+  default = "4"
 }
 
-# Reduced disk size (headless doesn't need 250G)
 variable "vm_disk_size" {
   type    = string
-  default = "50G"
+  default = "30G"
 }
 
-# Reduced RAM for headless
 variable "vm_memory" {
   type    = string
-  default = "2048"
+  default = "4096"
 }
 
-# UPDATED TEMPLATE NAME
 variable "vm_name" {
   type    = string
   default = "kali-x64-headless-template"
