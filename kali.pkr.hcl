@@ -158,8 +158,20 @@ build {
     inline = [
       "echo 'Waiting for cloud-init/boot finish...'",
       "sleep 10",
+      "apt-get purge -y \
+        os-prober doc-debian debian-faq manpages reportbug python3-reportbug apt-listchanges man-db groff-base \
+        kali-linux-firmware firmware-linux firmware-linux-free firmware-linux-nonfree firmware-misc-nonfree \
+        bluez-firmware \
+        firmware-ath9k-htc firmware-atheros firmware-brcm80211 firmware-carl9170 firmware-iwlwifi firmware-libertas \
+        firmware-mediatek firmware-realtek firmware-zd1211 \
+        firmware-amd-graphics firmware-intel-graphics firmware-nvidia-graphics \
+        firmware-intel-misc firmware-intel-sound firmware-sof-signed firmware-marvell-prestera \
+        amd64-microcode intel-microcode iucode-tool",
+      "sudo apt-get autoremove --purge -y",
       "sudo apt-get update",
-      "sudo apt-get clean"
+      "sudo apt-get clean",
+      "sudo dd if=/dev/zero of=/EMPTY bs=1M || true; sudo rm -f /EMPTY",
+      "sudo sync"
     ]
   }
 }
