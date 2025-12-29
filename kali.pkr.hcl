@@ -158,7 +158,7 @@ build {
     inline = [
       "echo 'Waiting for cloud-init/boot finish...'",
       "sleep 10",
-      "apt-get purge -y \
+      "sudo apt-get purge -y \
         os-prober doc-debian debian-faq manpages reportbug python3-reportbug apt-listchanges man-db groff-base \
         kali-linux-firmware firmware-linux firmware-linux-free firmware-linux-nonfree firmware-misc-nonfree \
         bluez-firmware \
