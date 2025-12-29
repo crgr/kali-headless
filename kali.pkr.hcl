@@ -3,6 +3,7 @@ variable "iso_checksum" {
   default = "sha256:f237246c2ec4391aa0d82f705736d70dd57476042fbfdaa9c9786904d770f745"
 }
 
+# The operating system. Can be wxp, w2k, w2k3, w2k8, wvista, win7, win8, win10, l24 (Linux 2.4), l26 (Linux 2.6+), solaris or other. Defaults to other.
 variable "os" {
   type    = string
   default = "l26"
@@ -43,6 +44,7 @@ variable "ssh_username" {
   default = "kali"
 }
 
+# This block has to be in each file or packer won't be able to use the variables
 variable "proxmox_url" {
   type = string
 }
@@ -77,13 +79,13 @@ variable "ansible_home" {
 variable "ludus_nat_interface" {
   type = string
 }
+####
 
 locals {
-  template_description = "Kali Linux HEADLESS (Minimal) template built ${legacy_isotime("2006-01-02 03:04:05")} username:password => kali:kali"
+  template_description = "Kali Linux headless template built ${legacy_isotime("2006-01-02 03:04:05")} username:password => kali:kali"
 }
 
 source "proxmox-iso" "kali-headless" {
-  # UPDATED BOOT COMMAND
   boot_command = [
     "<esc><wait>",
     "auto <wait>",
@@ -97,8 +99,7 @@ source "proxmox-iso" "kali-headless" {
     "keyboard-configuration/xkb-keymap=us <wait>",
     "locale=en_US <wait>",
     "netcfg/get_hostname=kali <wait>",
-    # Points to the HEADLESS preseed
-    "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/kali-headless-preseed.cfg <wait>",
+    "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg <wait>",
     "<enter><wait>"
   ]
   boot_key_interval = "100ms"
@@ -138,13 +139,22 @@ source "proxmox-iso" "kali-headless" {
   ssh_username         = "${var.ssh_username}"
   ssh_wait_timeout     = "30m"
   unmount_iso          = true
-  task_timeout         = "20m"
+  task_timeout         = "20m" // On slow disks the imgcopy operation takes > 1m
 }
 
 build {
   sources = ["source.proxmox-iso.kali-headless"]
 
+  # provisioner "ansible" {
+  #   user               = "${var.ssh_username}"
+  #   use_proxy          = false
+  #   extra_arguments    = ["--extra-vars", "{ansible_python_interpreter: /usr/bin/python3, ansible_password: ${var.ssh_password}, ansible_sudo_pass: ${var.ssh_password}}", "--ssh-extra-args", "-o StrictHostKeyChecking=no"]
+  #   playbook_file      = "./kali.yml"
+  #   ansible_env_vars   = ["ANSIBLE_HOME=${var.ansible_home}", "ANSIBLE_LOCAL_TEMP=${var.ansible_home}/tmp", "ANSIBLE_PERSISTENT_CONTROL_PATH_DIR=${var.ansible_home}/pc", "ANSIBLE_SSH_CONTROL_PATH_DIR=${var.ansible_home}/cp"]
+  #   skip_version_check = true
+  # }
   provisioner "shell" {
+  	execute_command = "echo '${var.ssh_password}' | sudo -S -E sh -c '{{ .Vars }} {{ .Path }}'"
     inline = [
       "echo 'Waiting for cloud-init/boot finish...'",
       "sleep 10",
